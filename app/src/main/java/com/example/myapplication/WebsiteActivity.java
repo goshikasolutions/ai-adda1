@@ -1,19 +1,17 @@
 package com.example.myapplication;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -24,38 +22,40 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class WebsiteActivity extends AppCompatActivity {
 
     private DatabaseReference mDatabase;
-    private List<String> chatList;
-    private RecyclerView recyclerView;
-    private ChatListAdapter chatListAdapter;
+    private List<String> WebsiteList;
+    private RecyclerView recyclerViewWebsite;
+
+    private WebsiteListAdapter websiteListAdapter;
 
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_website);
+
 
         mDatabase = FirebaseDatabase.getInstance().getReference().child("category");
 
-        chatList = new ArrayList<>();
+        WebsiteList = new ArrayList<>();
 
-        recyclerView = findViewById(R.id.recyclerViewCategory);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        chatListAdapter = new ChatListAdapter(chatList);
-        recyclerView.setAdapter(chatListAdapter);
+        recyclerViewWebsite = findViewById(R.id.recyclerViewWebsiteList);
+        recyclerViewWebsite.setLayoutManager(new LinearLayoutManager(this));
+        websiteListAdapter = new WebsiteListAdapter(WebsiteList);
+        recyclerViewWebsite.setAdapter(websiteListAdapter);
 
-        mDatabase.child("list").addListenerForSingleValueEvent(new ValueEventListener() {
+        mDatabase.child("websites").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 Log.d("TAG", "Document ID: ");
                 for (DataSnapshot chatSnapshot : dataSnapshot.getChildren()) {
                     String chatItem = chatSnapshot.getValue(String.class);
                     Log.d("TAG", "Document ID: " + chatItem);
-                    chatList.add(chatItem);
+                    WebsiteList.add(chatItem);
                 }
-                chatListAdapter.notifyDataSetChanged();
+                websiteListAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -65,32 +65,24 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ViewHolder> {
+    public class WebsiteListAdapter extends RecyclerView.Adapter<WebsiteListAdapter.ViewHolder> {
         private List<String> chatList;
 
-        public ChatListAdapter(List<String> chatList) {
+        public WebsiteListAdapter(List<String> chatList) {
             this.chatList = chatList;
         }
 
         @NonNull
         @Override
         public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.category_list, parent, false);
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.website_list, parent, false);
             return new ViewHolder(view);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
+        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
             String chatItem = chatList.get(position);
             holder.chatTextView.setText(chatItem);
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Toast.makeText(MainActivity.this, "An error occurred.", Toast.LENGTH_SHORT).show();
-                    Intent intent = new Intent(MainActivity.this, WebsiteActivity.class);
-                    startActivity(intent);
-                }
-            });
         }
 
         @Override
@@ -103,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
 
             public ViewHolder(View itemView) {
                 super(itemView);
-                chatTextView = itemView.findViewById(R.id.textViewUsername);
+                chatTextView = itemView.findViewById(R.id.textViewWebsiteName);
             }
         }
     }
