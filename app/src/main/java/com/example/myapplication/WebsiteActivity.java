@@ -1,6 +1,8 @@
 package com.example.myapplication;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -8,6 +10,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -55,8 +59,8 @@ public class WebsiteActivity extends AppCompatActivity {
                     for (Map<String, String> item : items) {
                         String name = item.get("name");
                         String icon = item.get("icon");
-//                        String link = item.get("Link");
-                        webList.add(new CategoryItem(name, icon, icon));;
+                        String link = item.get("link");
+                        webList.add(new CategoryItem(name, icon, link));;
                     }
 
                     websiteListAdapter.notifyDataSetChanged();
@@ -100,6 +104,15 @@ public class WebsiteActivity extends AppCompatActivity {
                     .setDefaultRequestOptions(requestOptions)
                     .load(icon)
                     .into(holder.icon);
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    // Open the link in a browser
+                    Toast.makeText(v.getContext(), "Thanks for using AI Adda ", Toast.LENGTH_SHORT).show();
+                    Intent urlIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+                    startActivity(urlIntent);
+                }
+            });
         }
 
         @Override

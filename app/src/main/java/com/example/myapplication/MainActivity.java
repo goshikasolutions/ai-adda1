@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
                     for (Map<String, String> item : items) {
                         String type = item.get("type");
                         String imageURL = item.get("imageURL");
-                        chatList.add(new CategoryItem(type, imageURL, imageURL));;
+                        chatList.add(new CategoryItem(type, imageURL));;
                     }
 
                     chatListAdapter.notifyDataSetChanged();
@@ -87,10 +87,8 @@ public class MainActivity extends AppCompatActivity {
         public void onBindViewHolder(@NonNull ViewHolder holder, @SuppressLint("RecyclerView") int position) {
             CategoryItem chatItem = chatList.get(position);
             String type = chatItem.getType();
-            String subtext = chatItem.getSubtext();
             String imageURL = chatItem.getImageURL();
             holder.chatTextView.setText(type);
-            holder.subtext.setText(subtext);
             RequestOptions requestOptions = new RequestOptions()
                     .error(R.drawable.ic_menu_camera);
 
@@ -115,13 +113,11 @@ public class MainActivity extends AppCompatActivity {
 
         public class ViewHolder extends RecyclerView.ViewHolder {
             public TextView chatTextView;
-            public TextView subtext;
             public ImageView image;
 
             public ViewHolder(View itemView) {
                 super(itemView);
                 chatTextView = itemView.findViewById(R.id.textViewUsername);
-                subtext = itemView.findViewById(R.id.textViewSubtext);
                 image = itemView.findViewById(R.id.imageViewProfile);
             }
         }
@@ -129,21 +125,15 @@ public class MainActivity extends AppCompatActivity {
 
     public class CategoryItem {
         private String type;
-        private String subtext;
         private String imageURL;
 
-        public CategoryItem(String type, String subtext, String imageURL) {
+        public CategoryItem(String type, String imageURL) {
             this.type = type;
-            this.subtext = subtext;
             this.imageURL = imageURL;
         }
 
         public String getType() {
             return type;
-        }
-
-        public String getSubtext() {
-            return subtext;
         }
 
         public String getImageURL() {
