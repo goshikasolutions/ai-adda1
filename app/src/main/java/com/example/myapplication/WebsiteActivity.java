@@ -6,83 +6,100 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class WebsiteActivity extends AppCompatActivity {
 
-    private DatabaseReference mDatabase;
-    private List<String> WebsiteList;
-    private RecyclerView recyclerViewWebsite;
-
+    private List<CategoryItem> webList;
+    private RecyclerView recyclerView;
     private WebsiteListAdapter websiteListAdapter;
+    private CollectionReference categoryRef;
 
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_website);
+        String Type = getIntent().getStringExtra("Type");
 
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        categoryRef = db.collection("category");
+        webList = new ArrayList<>();
+        recyclerView = findViewById(R.id.recyclerViewWebsiteList);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        websiteListAdapter = new WebsiteListAdapter(webList);
+        recyclerView.setAdapter(websiteListAdapter);
 
-        mDatabase = FirebaseDatabase.getInstance().getReference().child("category");
-
-        WebsiteList = new ArrayList<>();
-
-        recyclerViewWebsite = findViewById(R.id.recyclerViewWebsiteList);
-        recyclerViewWebsite.setLayoutManager(new LinearLayoutManager(this));
-        websiteListAdapter = new WebsiteListAdapter(WebsiteList);
-        recyclerViewWebsite.setAdapter(websiteListAdapter);
-
-        mDatabase.child("websites").addListenerForSingleValueEvent(new ValueEventListener() {
+        categoryRef.document(Type).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Log.d("TAG", "Document ID: ");
-                for (DataSnapshot chatSnapshot : dataSnapshot.getChildren()) {
-                    String chatItem = chatSnapshot.getValue(String.class);
-                    Log.d("TAG", "Document ID: " + chatItem);
-                    WebsiteList.add(chatItem);
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if (documentSnapshot.exists()) {
+                    Map<String, Object> data = documentSnapshot.getData();
+                    List<Map<String, String>> items = (List<Map<String, String>>) data.get("items");
+
+                    for (Map<String, String> item : items) {
+                        String name = item.get("name");
+                        String icon = item.get("icon");
+//                        String link = item.get("Link");
+                        webList.add(new CategoryItem(name, icon, icon));;
+                    }
+
+                    websiteListAdapter.notifyDataSetChanged();
                 }
-                websiteListAdapter.notifyDataSetChanged();
             }
-
+        })
+        .addOnFailureListener(new OnFailureListener() {
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle the error
+            public void onFailure(@NonNull Exception e) {
+                Log.e("Firestore", "Error getting data from ", e);
             }
         });
     }
 
     public class WebsiteListAdapter extends RecyclerView.Adapter<WebsiteListAdapter.ViewHolder> {
-        private List<String> chatList;
+        private List<CategoryItem> chatList;
 
-        public WebsiteListAdapter(List<String> chatList) {
+        public WebsiteListAdapter(List<CategoryItem> chatList) {
             this.chatList = chatList;
         }
 
         @NonNull
         @Override
-        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        public WebsiteListAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.website_list, parent, false);
-            return new ViewHolder(view);
+            return new WebsiteListAdapter.ViewHolder(view);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            String chatItem = chatList.get(position);
-            holder.chatTextView.setText(chatItem);
+        public void onBindViewHolder(@NonNull WebsiteListAdapter.ViewHolder holder, @SuppressLint("RecyclerView") int position) {
+            CategoryItem chatItem = chatList.get(position);
+            String name = chatItem.getName();
+            String icon = chatItem.getIcon();
+            String link = chatItem.getLink();
+            holder.name.setText(name);
+            holder.link.setText(link);
+            RequestOptions requestOptions = new RequestOptions()
+                    .error(R.drawable.ic_menu_camera); // Error image if the loading fails
+
+            Glide.with(holder.itemView.getContext())
+                    .setDefaultRequestOptions(requestOptions)
+                    .load(icon)
+                    .into(holder.icon);
         }
 
         @Override
@@ -91,12 +108,40 @@ public class WebsiteActivity extends AppCompatActivity {
         }
 
         public class ViewHolder extends RecyclerView.ViewHolder {
-            public TextView chatTextView;
+            public TextView name;
+            public TextView link;
+            public ImageView icon;
 
             public ViewHolder(View itemView) {
                 super(itemView);
-                chatTextView = itemView.findViewById(R.id.textViewWebsiteName);
+                name = itemView.findViewById(R.id.textViewWebsiteName);
+                link = itemView.findViewById(R.id.textViewWebsiteLink);
+                icon = itemView.findViewById(R.id.imageViewProfile1);
             }
+        }
+    }
+
+    public class CategoryItem {
+        private String name;
+        private String icon;
+        private String link;
+
+        public CategoryItem(String name, String icon, String link) {
+            this.name = name;
+            this.icon = icon;
+            this.link = link;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getIcon() {
+            return icon;
+        }
+
+        public String getLink() {
+            return link;
         }
     }
 }
