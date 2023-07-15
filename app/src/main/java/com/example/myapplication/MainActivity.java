@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,14 +16,25 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private List<String> chatList;
     private RecyclerView recyclerView;
     private ChatListAdapter chatListAdapter;
+    private CollectionReference categoryRef;
 
     @SuppressLint("MissingInflatedId")
     @Override
@@ -39,6 +52,8 @@ public class MainActivity extends AppCompatActivity {
 
         mDatabase = FirebaseDatabase.getInstance().getReference().child("category");
 
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        categoryRef = db.collection("category");
         chatList = new ArrayList<>();
 
         recyclerView = findViewById(R.id.recyclerViewCategory);
@@ -46,21 +61,30 @@ public class MainActivity extends AppCompatActivity {
         chatListAdapter = new ChatListAdapter(chatList);
         recyclerView.setAdapter(chatListAdapter);
 
-        mDatabase.child("list").addListenerForSingleValueEvent(new ValueEventListener() {
+        categoryRef.document("category_list").get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                Log.d("TAG", "Document ID: ");
-                for (DataSnapshot chatSnapshot : dataSnapshot.getChildren()) {
-                    String chatItem = chatSnapshot.getValue(String.class);
-                    Log.d("TAG", "Document ID: " + chatItem);
-                    chatList.add(chatItem);
-                }
-                chatListAdapter.notifyDataSetChanged();
-            }
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                if (documentSnapshot.exists()) {
+                    Map<String, Object> data = documentSnapshot.getData();
+                    List<Map<String, String>> items = (List<Map<String, String>>) data.get("items");
 
+                    for (Map<String, String> item : items) {
+                        String type = item.get("type");
+                        String imageURL = item.get("type");
+                        chatList.add(imageURL);
+                    }
+
+                    chatListAdapter.notifyDataSetChanged();
+                } else {
+                    // Document does not exist
+                }
+
+            }
+        })
+        .addOnFailureListener(new OnFailureListener() {
             @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle the error
+            public void onFailure(@NonNull Exception e) {
+                Log.e("Firestore", "Error getting data from ", e);
             }
         });
     }
