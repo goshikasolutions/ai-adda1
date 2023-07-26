@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.goshika.myapplication;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -40,6 +40,12 @@ public class WebsiteActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_website);
         String Type = getIntent().getStringExtra("Type");
+//
+//        Toolbar toolbar1 = findViewById(R.id.toolbar2);
+//        setSupportActionBar(toolbar1);
+//
+//        // Set the subtitle in the toolbar
+//        getSupportActionBar().setSubtitle("Your Subtitle");
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         categoryRef = db.collection("category");

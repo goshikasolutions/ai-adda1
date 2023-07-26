@@ -10,7 +10,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:575564404984:android:b9a793dba90b6d70b9030d",
         "android_client_info": {
-          "package_name": "com.example.aiadda"
+          "package_name": "com.goshika.aiadda"
         }
       },
       "oauth_client": [
@@ -39,7 +39,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:575564404984:android:fe96221734dada55b9030d",
         "android_client_info": {
-          "package_name": "com.example.myapplication"
+          "package_name": "com.goshika.myapplication"
         }
       },
       "oauth_client": [

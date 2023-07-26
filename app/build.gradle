@@ -4,15 +4,15 @@ plugins {
 }
 
 android {
-    namespace 'com.example.myapplication'
+    namespace 'com.goshika.myapplication'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.myapplication"
-        minSdk 24
-        targetSdk 33
-        versionCode 1
-        versionName "1.0"
+        applicationId "com.goshika.myapplication"
+        minSdk 21
+        targetSdk 31
+        versionCode 2
+        versionName "1.2"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
